@@ -1,0 +1,420 @@
+###########################################################################################################################################
+
+
+							Necula Leonard-Gabriel 313 AB
+
+
+###########################################################################################################################################
+
+
+						Descrierea metodei de rezolvare a problemei 
+
+
+###########################################################################################################################################
+
+1. prima data citesc datele din fisierul de intrare, date din care sunt create 
+liste, o lista de echipe, fiecare echipa contine la randul ei o lista de jucatori
+2. eliminarea echipelor pana raman un numar de echipe egal cu o putere a lui 2 este implementata astfel :
+	- gasesc primul numar mai mic sau egal cu numarul de echipe care este o putere a lui doi 
+	- calculez numarul de echipe ce vor fi eliminate si primul minim 
+	- cat timp mai am echipe de eliminat :
+		* verific daca capul listei este minim, caz in care il elimin, si continui stergerea de la noul cap
+		* daca capul nu are scorul minim parcurg lista pana gasesc un element cu punctaj minim, il sterg si continui
+		procesul pana cand am eliminat toate echipele cu punctajul minim sau am eliminat atatea echipe cate aveam de eliminat
+		* calculez din nou minimul si reiau pasii enumerati anterior
+3. pentru "campionat" :
+	- bag lista initiala intr-o stiva
+	- intr-o functie recursiva fac urmatoarele operatii :
+		* daca numarul de echipe este egal cu 1 ne oprim daca nu :		
+			~ bag elementele din stiva intr-o coada si apoi afisez meciurile din coada
+			~ dau deQueue echipelor din coada de meciuri si fac doua stive:
+				a. una cu castigatorii ( adaug 1 la scorul fiecarui jucator )
+				b. una cu invinsii
+			~ afisez stiva de castigatorii si sterg stiva de invinsi 
+			~ calculez numarul de echipe ramase ( num / 2 )
+			~ daca au ramas 8 echipe bag intr-o lista echipele ramse deoarece le voi folosi la taskul 4
+			~ apelez din nou functia
+
+4. pentru crearea Binary Search Tree-ului :
+	- din echipele salvate la punctul anterior cream un BST
+	- arborele creat este afisat in inordine-inversa ( dreapta - radacina - stanga )
+
+5. pentru crearea AVL-ului :
+	- din echipele salvate la punctul anterior cream un AVL ( ma gandeam sa creez un BST balansat, dar nu stiam daca
+	cerinta impune sau nu algoritmul de la AVl, asa ca am ales sa fac un AVl )
+	- afisarea datelor de pe nivelul 2 nu este facuta intr-un fisier
+
+
+###########################################################################################################################################
+
+
+					STRUCTURILE UTILIZATE IN REZOLVAREA PROBLEMEI
+
+
+###########################################################################################################################################
+
+Urmatoarele structuri se afla in header-ul structuri.h
+
+
+- o structura pentru jucatori
+- o structura pentru echipe
+- o strcutura din care creez stiva
+- o structura pentru stiva
+- o structura pentru un meci
+- o structura pentru doua echipe ( folosita la deQueue )
+- o structura pentru Binary Search Tree
+- o structura pentru AVL
+
+
+
+
+###########################################################################################################################################
+
+			
+			Functiile pentru rezolvarea problemei au fost impartite in mai multe fisiere :
+
+
+###########################################################################################################################################
+
+
+
+		# LISTE.c , LISTE.h -> contin functiile folosite pentru implementarea operatiilor efectuate pe liste
+	
+###########################################################################################################################################
+		
+	p_jucator nod_nou(char *nume, char *prenume, int exp) 
+	- returneaza un nod nou de tipul p_jucator ( adresa 
+	nodului in care am stocat numele, prenumele si scorul )	
+
+###########################################################################################################################################
+
+	p_echipa echipa_noua(char *nume, int nr_membri, p_jucator adresa_inceput)
+	- returneaza un nod de tip p_echipa ( adresa nodului in care am stocat, 
+	numele echipei, numarul de membri si adresa capului listei de jucatori )
+
+###########################################################################################################################################
+	
+	void adauga_echipa_la_inceput(char *nume, int nr_membri, p_jucator adresa_inceput, p_echipa *adresa_inceput_echipa)
+	- adauga in lista de echipe ( adresa_inceput_echipa ) o noua echipa la inceputul listei
+
+###########################################################################################################################################
+
+	void adauga_jucator_la_inceput(char *nume, char *prenume, int exp, p_jucator *adresa_inceput)
+	- adauga un jucator nou la inceputul listei de jucatori
+
+###########################################################################################################################################
+
+	double scor_echipa(p_jucator adresa_inceput)
+	- returneaza scorul unei echipe, avand ca parametru inceputul listei de jucatori
+
+###########################################################################################################################################
+
+	void adauga_1_la_scor(p_echipa adresa_echipa);
+	- adauga 1 la punctajul tuturor jucatorilor unei echipe date prin adresa
+
+###########################################################################################################################################
+
+	p_echipa creare_lista_cu_inserare_la_inceput(char *filename, int *nr_echipe);
+	- returneaza un pointer spre inceputul listei de echipe, creata cu datele din
+	fisierul dat prin parametrul filename; numarul de echipe este returnat prin 
+	parametrul nr_echipe	
+
+###########################################################################################################################################
+
+	void sterge_membri_echipei(p_jucator *adresa_inceput);
+	- elibereaza memoria ocupata de jucatori , singurul parametru fiind adresa de inceput
+	a jucatorilor ( pointer dublu )
+
+###########################################################################################################################################
+
+	void sterge_echipa(p_echipa *adresa_elementului_pe_care_il_eliminam);
+	- realizeaza eliberarea memoriei ocupate de o echipa, functia apleaza 
+	"sterge_membri_echipei" pentru a sterge jucatorii 
+
+###########################################################################################################################################
+
+	void afisare_normala(FILE *f, p_echipa adresa_inceput);
+	- afiseaza in fisierul f toate echipele incepand de la "adresa_inceput"
+	pana la finalul listei	
+
+###########################################################################################################################################
+
+	double minim_puncte(p_echipa adresa_inceput, int *nr);
+	- returneaza scorul minim al echipelor din lista, si prin parametrul
+	"nr" numarul echipelor cu punctajul minim	
+
+###########################################################################################################################################
+	
+	void eliberare_memorie(p_echipa *adresa_inceput)
+	- elibereaza memoria ocupata de lista de echipe
+
+###########################################################################################################################################
+
+	void elimina_echipe_pana_raman_2_la_k(p_echipa *adresa_inceput, int *nr_echipe);
+	- realizeaza ekiminarea echipelor din lista pana cand raman doar 2^k echipe in 
+	aceasta
+	
+###########################################################################################################################################
+	
+		
+
+
+
+###########################################################################################################################################
+
+		# coada_stiva.c , coada_stiva.h -> contin functiile folosite pentru implementarea stivei si a cozii
+
+###########################################################################################################################################
+
+
+	p_echipa pop_echipa(p_stack stiva)
+	- returneaza adresa echipei din varful stivei
+
+###########################################################################################################################################
+
+	p_echipa_stack element_nou_stiva(p_echipa adresa_echipa)
+	- creaza un element nou de tip p_echipa_stack, element ce 
+	contine adresa unei echipe ( "adresa_echipa" ) si un pointer
+	catre urmatorul element de tip p_echipa_stack
+
+###########################################################################################################################################
+
+	void push_echipa(p_echipa adresa_echipa, p_stack stiva)
+	- introduce un noua echipa in stiva
+
+###########################################################################################################################################
+
+	p_stack stiva_din_lista(p_echipa adresa_inceput)
+	- pune lista initiala de echipe intr-o stiva	
+
+###########################################################################################################################################
+
+	p_stack rastoarna_stiva(p_stack stiva)
+	- inverseaza ordinea elementelor din stiva
+
+###########################################################################################################################################
+
+	p_meci meci_nou(p_echipa echipa1, p_echipa echipa2)
+	- returneaza adresa unui meci nou ( structura contine doi
+	pointeri catre doua echipe si un pointer catre urmatorul element
+	de acest tip )	
+
+###########################################################################################################################################
+
+	p_coada set_Coada()
+	- initializeaza coada, si returneaza adresa acesteia
+
+###########################################################################################################################################
+
+	void in_Coada(p_coada coada, p_meci de_adaugat_in_coada)
+	- adauga un meci nou la finalul cozii
+
+###########################################################################################################################################
+
+	p_stack set_Stiva()
+	- initializeazaz stiva si returneaza adresa acesteia
+
+###########################################################################################################################################
+
+	p_doua_echipe de_Queue(p_coada coada)
+	- returneaza o structura ce contine adresele echipelor
+	din structura de tip meci din care coada a fost creata	
+
+###########################################################################################################################################
+
+	p_coada coada_noua(p_stack stiva)
+	- baga toate elementele din stiva intr-o coada
+
+###########################################################################################################################################
+	
+	void adauga_echipa_data_prin_adresa(p_echipa adresa_echipa, p_echipa *adresa_inceput_stiva)	
+	- adauga o echipa data prin adresa intr-o lista de echipe
+
+###########################################################################################################################################
+
+	void afisare_rezultate(FILE *f, p_stack stiva)
+	- afiseaza stiva in fisierul de rezultate
+
+###########################################################################################################################################
+
+	void afisare_meciuri(FILE *f, p_coada coada)
+	- afiseaza meciurile din coada in fisierul de rezultate
+
+###########################################################################################################################################
+
+	void goleste_stiva(p_stack stiva, int mode);
+	- goleste stiva si elibereaza memoria ocupata de echipele din stiva pentru
+	mode = 1, iar pentru mode != 1 elibereaza doar memoria ocupata de structura pentru
+	stiva
+
+###########################################################################################################################################
+
+	p_echipa primele_8_echipe(p_stack stiva);
+	- returneaza adresa unei liste create cu primele 8 echipe din clasament
+
+###########################################################################################################################################
+
+	void campionat(FILE *f, p_stack stiva, int *num, p_echipa *date_pentru_arbore)
+	- functia se foloseste de functiile implementate in fiserele LISTE.c si coada_stiva.c
+	pentru a realiza cerinta 3, aceasta se apeleaza recursiv pana cand "num" devine egal cu 1
+
+###########################################################################################################################################
+	
+
+
+
+
+###########################################################################################################################################
+
+			# arbori.c ,  arbori.h -> contin implementarea avl-ului si cea a bst-ului
+
+###########################################################################################################################################
+
+	
+	p_arbore initializare_nod(p_echipa adresa_echipa)
+	- returneaza adresa unui nod de tip p_arbore, ce contine adresa
+	unui unei echipe si pointeri catre cei doi copii ai nodului
+
+###########################################################################################################################################
+
+	void inorder_invers(p_arbore radacina, FILE *f)
+	- afiseaza arborele in fiserul f, in inordine ( dreapta - radacina - stanga )
+
+###########################################################################################################################################
+
+	p_arbore pozitia_de_inserat(p_arbore radacina, double valoare)
+	- returneaza pozitia la care trebuie adaugat nodul a carui
+	echipa are punctajul egal cu "valoare"
+
+###########################################################################################################################################
+
+	void leaga_de_arbore(p_arbore nod_parinte, p_arbore nod_fiu)
+	- face legatura dintre nodul de inserat si parintele sau	
+
+###########################################################################################################################################
+
+	void sterge_arbore_si_date_aferente(p_arbore radacina)
+	- parcurgem arborele in postordine si sterge datele din noduri
+
+###########################################################################################################################################
+
+	p_arbore initializare_arbore(p_echipa adresa_inceput)
+	- functia creaza un BST din datele stocate in lista
+	"adresa_inceput"
+
+###########################################################################################################################################
+
+	int inaltime(p_avl node)
+	- returneaza inaltimea unui nod de tip p_avl
+
+###########################################################################################################################################
+
+	int max(int x, int y)
+	- returneaza valoarea maxima dintre x si y
+
+###########################################################################################################################################
+
+	p_avl rotatieDreapta(p_avl nod_de_rotit)
+	- roteste arborele spre dreapta, si returneaza adresa
+	noii radacini a subarborelui rotit
+
+###########################################################################################################################################
+
+	p_avl rotatieStanga(p_avl nod_de_rotit)
+	- roteste arborele spre stanga, si returneaza adresa
+	noii radacini a subarborelui rotit
+
+###########################################################################################################################################
+
+	p_avl rotatieStangaDreapta(p_avl nod_de_rotit)
+	- roteste subarborele stang spre stanga si apoi roteste
+	 nodul de rotit	spre dreapta, si returneaza adresa
+	noii radacini a subarborelui rotit
+
+###########################################################################################################################################
+	
+	p_avl rotatieDreaptaStanga(p_avl nod_de_rotit)
+	- roteste subarborele drept spre dreapta si apoi roteste
+	nodul de rotit spre stanga, si returneaza adresa
+	noii radacini a subarborelui rotit
+
+###########################################################################################################################################
+
+	p_avl adaugare_nod_in_avl(p_avl nod, p_echipa adresa_echipa)
+	- returneaza adresa radacinii arborelui dupa adaugarea unui
+	nod nou
+
+###########################################################################################################################################
+
+	int dist_to_root(p_avl nod, p_avl nod_de_cautat, int nivel)
+	- returneaza distanta de la radacina la "nodul_de_cautat"
+
+###########################################################################################################################################
+	
+	void printLvL(p_avl root, p_avl nod, int nivel)
+	- afiseaza pe ecran toate nodurile aflate pe nivelul
+	egal cu parametrul "nivel"
+
+###########################################################################################################################################
+
+	void eliberare_memorie_avl(p_avl root)
+	- elibereaza memoria ocupata de AVL, folosind
+	o parcurgere in postordine
+
+###########################################################################################################################################
+
+	p_avl creare_avl(p_echipa date_pentru_avl)
+	- returneaza adreasa radacinii AVL-ului creat
+	din datele din parametrul "date_pentru_avl"
+
+###########################################################################################################################################
+
+
+
+
+
+###########################################################################################################################################
+
+			# amestec.c , amestec.h -> contin functii care nu opereaza pe liste/cozi/stive/arbori
+
+###########################################################################################################################################
+	
+	void elimina_enter(char *sir)
+	- elimina \n -ul de la finalul unui sir de caractere
+
+###########################################################################################################################################
+
+	int putere_a_lui_2(int numar)
+	- returneaza cel mai mare numar mai mic sau egal cu numarul
+	"numar" ce este o putere a lui 2 ( shiftari pe biti )
+
+###########################################################################################################################################
+	
+	FILE* deschide_fisier(char *filename, char *mod)
+	- returneaza adresa fisierului cu numele dat de
+	parametrul "filename" deschis in modul indicat
+	de parametrul "mod"
+
+###########################################################################################################################################
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+		 
+ 
